@@ -1,0 +1,71 @@
+class Nodo:
+    def __init__(self, dado=0, nodo_anterior=None):
+        self.dado = dado
+        self.prev = nodo_anterior
+
+    def __repr__(self):
+        return '%s -> %s' % (self.dado, self.prev)
+
+
+class Pilha:
+    def __init__(self):
+        self.top = None
+
+    def __repr__(self):
+        return "[" + str(self.top) + "]"
+
+    def inserir(self,valor):
+        if self.top is None:
+            self.top = Nodo(valor)
+        else:
+            NovoNodo = Nodo(valor)
+            NovoNodo.prev = self.top
+            self.top = NovoNodo
+
+    def remove(self,valor):
+        if self.top.dado == valor:
+            self.top = self.top.prev
+
+    def mostra(self,nodo=None):
+        if nodo is None:
+            nodo = self.top
+        print(nodo.dado,end="")
+        if nodo.prev is not None:
+            self.mostra(nodo.prev)
+
+    def desempilha(self,stack=None):
+        if stack is None:
+            stack = Pilha()
+        stack.inserir(self.top.dado)
+        if self.top.prev is not None:
+            self.top = self.top.prev
+            return self.desempilha(stack)
+        else:
+            return stack
+
+    def isPalindrome(self,string,stack_og=None,stack_rev=None,string_og="",string_rev=""):
+        if stack_og is None and stack_rev is None:
+            stack_og = Pilha()
+            stack_rev = Pilha()
+            stack_og.top = self.top
+            stack_rev.top = self.top
+            stack_rev = stack_rev.desempilha()
+        string_og += stack_og.top.dado
+        string_rev += stack_rev.top.dado
+        if stack_og.top.prev is not None and stack_rev.top.prev is not None:
+            stack_og.top = stack_og.top.prev
+            stack_rev.top = stack_rev.top.prev
+            self.isPalindrome(string,stack_og,stack_rev,string_og,string_rev)
+        else:
+            if string_og == string_rev:
+                print(string," é palíndromo")
+            else:
+                print(string," não é palíndromo")
+
+expr = "A grama é amarga"
+pilha = Pilha()
+p = Pilha()
+for itr in expr:
+    if itr.isalpha() is True:
+        pilha.inserir(itr.lower())
+pilha.isPalindrome(expr)
