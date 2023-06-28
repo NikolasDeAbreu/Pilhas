@@ -1,0 +1,54 @@
+class Nodo:
+    def __init__(self, dado=0, nodo_anterior=None):
+        self.dado = dado
+        self.prev = nodo_anterior
+
+    def __repr__(self):
+        return '%s -> %s' % (self.dado, self.prev)
+
+
+class Pilha:
+    def __init__(self):
+        self.top = None
+
+    def __repr__(self):
+        return "[" + str(self.top) + "]"
+
+    def inserir(self,valor):
+        if self.top is None:
+            self.top = Nodo(valor)
+        else:
+            NovoNodo = Nodo(valor)
+            NovoNodo.prev = self.top
+            self.top = NovoNodo
+
+    def remove(self,valor):
+        if self.top.dado == valor:
+            self.top = self.top.prev
+
+    def mostra(self,nodo=None):
+        if nodo is None:
+            nodo = self.top
+        print(nodo.dado,end="")
+        if nodo.prev is not None:
+            self.mostra(nodo.prev)
+
+    def balance(self,nodo=None,Dict=None):
+        if nodo is None:
+            nodo = self.top
+            Dict = {'[':0,']':0,'(':0,')':0,'{':0,'}':0}
+        if nodo.dado in ('(',')','[',']','{','}'):
+            Dict[nodo.dado] = Dict.get(nodo.dado,0) + 1
+        if nodo.prev is not None:
+            self.balance(nodo.prev,Dict)
+        else:
+            if Dict['('] == Dict[')'] and Dict['['] == Dict[']'] and Dict['{'] == Dict['}']:
+                print("A expressão está balanceada.")
+            else:
+                print("A expressão está desbalanceada")
+
+expr = "{4*[9/(7+3-9+2)*5]}"
+pilha = Pilha()
+for itr in expr:
+    pilha.inserir(itr)
+pilha.balance()
