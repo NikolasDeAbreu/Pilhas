@@ -1,0 +1,146 @@
+class Nodo:
+    def __init__(self, dado=0, nodo_anterior=None):
+        self.dado = dado
+        self.prev = nodo_anterior
+
+    def __repr__(self):
+        return '%s -> %s' % (self.dado, self.prev)
+
+
+class Pilha:
+    def __init__(self):
+        self.top = None
+
+    def __repr__(self):
+        return "[" + str(self.top) + "]"
+
+    def inserir(self,valor):
+        if self.top is None:
+            self.top = Nodo(valor)
+        else:
+            NovoNodo = Nodo(valor)
+            NovoNodo.prev = self.top
+            self.top = NovoNodo
+
+    def remove(self,valor):
+        if self.top.dado == valor:
+            self.top = self.top.prev
+
+    def mostra(self,nodo=None):
+        if self.top is None:
+            print("Pilha vazia")
+        else:
+            if nodo is None:
+                nodo = self.top
+            print(nodo.dado,end="")
+            if nodo.prev is not None:
+                self.mostra(nodo.prev)
+
+    def desempilha(self,stack=None):
+        if stack is None:
+            stack = Pilha()
+        stack.inserir(self.top.dado)
+        if self.top.prev is not None:
+            self.top = self.top.prev
+            return self.desempilha(stack)
+        else:
+            return stack
+
+    def infxTorpn(self,stack=None,rpn_stack=None):
+
+        def lerPrnts(new_stack=None):
+            if new_stack is None:
+                new_stack = Pilha()
+            if stack.top.dado == '(':
+                stack.top = stack.top.prev
+                lerPrnts()
+            if stack.top.dado != ')':
+                new_stack.inserir(stack.top.dado)
+                stack.top = stack.top.prev
+                lerPrnts(new_stack)
+            else:
+                stack.top = stack.top.prev
+                new_stack = new_stack.desempilha()
+                self.infxTorpn(new_stack,rpn_stack)
+
+        def nextTwo():
+            two_stack = Pilha()
+            aux_stack = Pilha()
+            aux_stack.top = stack.top.prev
+            loops = 0
+            while loops < 2 and aux_stack.top is not None:
+                two_stack.inserir(aux_stack.top.dado)
+                aux_stack.top = aux_stack.top.prev
+                loops += 1
+            return two_stack
+
+        if stack is None and rpn_stack is None:
+            stack = Pilha()
+            stack.top = self.top
+            stack = stack.desempilha()
+            rpn_stack = Pilha()
+        while True:
+            if stack.top.dado.isnumeric() is True:
+                rpn_stack.inserir(stack.top.dado)
+                stack.top = stack.top.prev
+            else:
+                if stack.top.dado in ('+','-') and stack.top.prev is not None:
+                    tmp = nextTwo()
+                    if tmp.top.dado not in ('*','/'):
+                        rpn_stack.inserir(stack.top.prev.dado)
+                        rpn_stack.inserir(stack.top.dado)
+                        stack.top = stack.top.prev.prev
+                    else:
+                        aux = stack.top.prev.prev.prev.dado
+                        if aux.isnumeric() is True:
+                            tmp = tmp.desempilha()
+                            rpn_stack.inserir(tmp.top.dado)
+                            rpn_stack.inserir(aux)
+                            tmp.top = tmp.top.prev
+                            rpn_stack.inserir(tmp.top.dado)
+                            rpn_stack.inserir(stack.top.dado)
+                            stack.top = stack.top.prev.prev.prev.prev
+                        else:
+                            aux = stack.top.dado
+                            stack.top = stack.top.prev.prev.prev.prev
+                            lerPrnts()
+                            tmp = tmp.desempilha()
+                            rpn_stack.inserir(tmp.top.dado)
+                            tmp.top = tmp.top.prev
+                            rpn_stack.inserir(tmp.top.dado)
+                            rpn_stack.inserir(aux)
+                elif stack.top.dado in ('+','-') and stack.top.prev is None:
+                    rpn_stack.inserir(stack.top.dado)
+                    stack.top = stack.top.prev
+                elif stack.top.dado in ('*','/') and stack.top.prev is not None:
+                    if stack.top.prev.dado != '(':
+                        rpn_stack.inserir(stack.top.prev.dado)
+                        rpn_stack.inserir(stack.top.dado)
+                        stack.top = stack.top.prev.prev
+                    else:
+                        aux = stack.top.dado
+                        stack.top = stack.top.prev.prev
+                        lerPrnts()
+                        rpn_stack.inserir(aux)
+                elif stack.top.dado in ('*', '/') and stack.top.prev is not None:
+                    rpn_stack.inserir(stack.top.dado)
+                    stack.top = stack.top.prev
+                elif stack.top.dado == '(':
+                    stack.top = stack.top.prev
+                    lerPrnts()
+            if stack.top is None:
+                break
+        return rpn_stack
+
+expr = "(((1+2)+3)+4)"
+pilha = Pilha()
+p = Pilha()
+for itr in expr:
+    if itr.isalnum() is True:
+        pilha.inserir(itr)
+    else:
+        if itr in ('+','-','*','/','(',')'):
+            pilha.inserir(itr)
+a = pilha.infxTorpn()
+a = a.desempilha()
+a.mostra()
