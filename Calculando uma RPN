@@ -1,0 +1,83 @@
+class Nodo:
+    def __init__(self, dado=0, nodo_anterior=None):
+        self.dado = dado
+        self.prev = nodo_anterior
+
+    def __repr__(self):
+        return '%s -> %s' % (self.dado, self.prev)
+
+
+class Pilha:
+    def __init__(self):
+        self.top = None
+
+    def __repr__(self):
+        return "[" + str(self.top) + "]"
+
+    def inserir(self,valor):
+        if self.top is None:
+            self.top = Nodo(valor)
+        else:
+            NovoNodo = Nodo(valor)
+            NovoNodo.prev = self.top
+            self.top = NovoNodo
+
+    def remove(self,valor):
+        if self.top.dado == valor:
+            self.top = self.top.prev
+
+    def mostra(self,nodo=None):
+        if self.top is None:
+            print("Pilha vazia")
+        else:
+            if nodo is None:
+                nodo = self.top
+            print(nodo.dado,end="")
+            if nodo.prev is not None:
+                self.mostra(nodo.prev)
+
+    def desempilha(self,stack=None):
+        if stack is None:
+            stack = Pilha()
+        stack.inserir(self.top.dado)
+        if self.top.prev is not None:
+            self.top = self.top.prev
+            return self.desempilha(stack)
+        else:
+            return stack
+
+    def rpn(self,stack=None,stack_res=None):
+        if stack is None and stack_res is None:
+            stack = Pilha()
+            stack.top = self.top
+            stack = stack.desempilha()
+            stack_res = Pilha()
+        if stack.top is not None:
+            if stack.top.dado.isnumeric() is True:
+                stack_res.inserir(int(stack.top.dado))
+            else:
+                if stack.top.dado == '+':
+                    aux = stack_res.top.prev.dado + stack_res.top.dado
+                elif stack.top.dado == '-':
+                    aux = stack_res.top.prev.dado - stack_res.top.dado
+                elif stack.top.dado == '*':
+                    aux = stack_res.top.prev.dado * stack_res.top.dado
+                else:
+                    aux = stack_res.top.prev.dado / stack_res.top.dado
+                stack_res.top = stack_res.top.prev.prev
+                stack_res.inserir(aux)
+            stack.top = stack.top.prev
+            self.rpn(stack,stack_res)
+        else:
+            stack_res.mostra()
+
+expr = "2 4 + 3 1 - / 4 x"
+pilha = Pilha()
+p = Pilha()
+for itr in expr:
+    if itr.isalnum() is True:
+        pilha.inserir(itr)
+    else:
+        if itr in ('+','-','*','/'):
+            pilha.inserir(itr)
+pilha.rpn()
